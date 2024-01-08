@@ -14,6 +14,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
@@ -45,53 +46,110 @@ public class ArtActivity extends AppCompatActivity {
     public void save (View view) {
 
 
+
     }
 
     public void selectImage (View view) {
-        //yani izin yoksa istiyoruz, yoksa galeriye gidiyoruz.
-        //ama izin vermisse tabii ki direkt yine giemiyoruz, ne yapacagimizi soylemek icin de bir regosterLauncer methodu iceriisnde kendisine ne yapagimi belirtecegiz.
-        //oncelikle asagidakini Manifest e ekledim
-        // <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != //burada dikkat et, manifets i secerken android den import et, java dan degil
-        PackageManager.PERMISSION_GRANTED){
-            //eger kendisine zorunlu olarak bir aciklama gostermeli isek...(bu android'in inisiyatifinde olan bir sey)
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
-                Snackbar.make(view,"Erisim icin izin gerekli",Snackbar.LENGTH_INDEFINITE).setAction("lutfen Izin Veriniz", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        //request permission
-                        permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE); //burada dikkat et, manifets i secerken android den import et, java dan degil
 
-                    }
-                }).show();
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+            //yeni getirirlen duzenlemeler sonrasi bu kontrolu yapmak gerekiyor
+            //yani bu Android 33 ve ustu ise
+            //Bu durumda Read MEdia Iamges' i istmememiz gerekiyor
+            //yani izin yoksa istiyoruz, yoksa galeriye gidiyoruz.
+            //ama izin vermisse tabii ki direkt yine giemiyoruz, ne yapacagimizi soylemek icin de bir regosterLauncer methodu iceriisnde kendisine ne yapagimi belirtecegiz.
+            //oncelikle asagidakini Manifest e ekledim
+            // <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"></uses-permission>
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) != //burada dikkat et, manifets i secerken android den import et, java dan degil
+                    PackageManager.PERMISSION_GRANTED){
+                //eger kendisine zorunlu olarak bir aciklama gostermeli isek...(bu android'in inisiyatifinde olan bir sey)
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_MEDIA_IMAGES)){
+                    Snackbar.make(view,"Erisim icin izin gerekli",Snackbar.LENGTH_INDEFINITE).setAction("lutfen Izin Veriniz", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //request permission
+                            permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES); //burada dikkat et, manifets i secerken android den import et, java dan degil
 
-            } else {
-                //request permission
-                permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+                        }
+                    }).show();
+
+                } else {
+                    //request permission
+                    permissionLauncher.launch(Manifest.permission.READ_MEDIA_IMAGES);
+
+                }
 
             }
 
+
+            else { //o zaman izin verilmis.
+                //gallery e git
+                //simdi ise biz baska bir yere gideegimizden oturu intenti kullancagiz. Ama bu sefer ne yapacginizi sececgiz cunku artik cihazin iceriisne gidiyoru ve cihazin iceriisnde ne yapacgimiz
+                //Action class i ile soyleyecegiz.
+                //ACTion= ne yapacagiz.
+                //Uri ile de ayni url de oldug gibi nereye gidecegimizi belirtecegiz.
+                //bu senaryo da pick yani biz gidip gallery den bir foto yu tutatcgiz.
+                //uri ile de ben gallery e gidecegm ve ordan bir gorsek alacgim diyecegim.
+
+                Intent intentToGallery=new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI); //gallery e gittim ve ordan bir image alip getirevegim.
+                //evet ben galeriye gittim simdi ne yapacagim? Bunun icin de REsultLAuncer gibi class lari kullanacagiz. Yani sekilde izin verildi mesela simdi ne yapacgim gibi durumlrda da ResultLAuncer
+                //i kullanacgiz.
+                //yukarida Global degisken olarak tanimlanan deguiskenlere bakabilirisn.
+                //ama oncelikle yukaridaki variable lare tabii ki kayit ettirmem gerekiyor bunun iicn de register Launcer (reggisterLauncer)gibi bir method yazacagim. Bu Launcer larin ne yapacagini hep asagidaki
+                //method da tanimlayacagm. ve daha sonra da onlari onCreate altinda cagiracagim.Yani bunlarin ben ne yapacgini tanimlamis olacagim onCreate altinda.
+                //yani bizim Launcer imiz varsa, bunun ne yapacagini Android e onCreate altinda soylememeiz gerekiyor.
+                activityResultLauncher.launch(intentToGallery); //gallery e git
+            }
+
+        } else {
+            //33 altinda ise O zaman Read External Storage istiyoruz.
+            //yani asagikdaki kodu
+
+            //yani izin yoksa istiyoruz, yoksa galeriye gidiyoruz.
+            //ama izin vermisse tabii ki direkt yine giemiyoruz, ne yapacagimizi soylemek icin de bir regosterLauncer methodu iceriisnde kendisine ne yapagimi belirtecegiz.
+            //oncelikle asagidakini Manifest e ekledim
+            // <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"></uses-permission>
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != //burada dikkat et, manifets i secerken android den import et, java dan degil
+                    PackageManager.PERMISSION_GRANTED){
+                //eger kendisine zorunlu olarak bir aciklama gostermeli isek...(bu android'in inisiyatifinde olan bir sey)
+                if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_EXTERNAL_STORAGE)){
+                    Snackbar.make(view,"Erisim icin izin gerekli",Snackbar.LENGTH_INDEFINITE).setAction("lutfen Izin Veriniz", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            //request permission
+                            permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE); //burada dikkat et, manifets i secerken android den import et, java dan degil
+
+                        }
+                    }).show();
+
+                } else {
+                    //request permission
+                    permissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE);
+
+                }
+
+            }
+
+
+            else { //o zaman izin verilmis.
+                //gallery e git
+                //simdi ise biz baska bir yere gideegimizden oturu intenti kullancagiz. Ama bu sefer ne yapacginizi sececgiz cunku artik cihazin iceriisne gidiyoru ve cihazin iceriisnde ne yapacgimiz
+                //Action class i ile soyleyecegiz.
+                //ACTion= ne yapacagiz.
+                //Uri ile de ayni url de oldug gibi nereye gidecegimizi belirtecegiz.
+                //bu senaryo da pick yani biz gidip gallery den bir foto yu tutatcgiz.
+                //uri ile de ben gallery e gidecegm ve ordan bir gorsek alacgim diyecegim.
+
+                Intent intentToGallery=new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI); //gallery e gittim ve ordan bir image alip getirevegim.
+                //evet ben galeriye gittim simdi ne yapacagim? Bunun icin de REsultLAuncer gibi class lari kullanacagiz. Yani sekilde izin verildi mesela simdi ne yapacgim gibi durumlrda da ResultLAuncer
+                //i kullanacgiz.
+                //yukarida Global degisken olarak tanimlanan deguiskenlere bakabilirisn.
+                //ama oncelikle yukaridaki variable lare tabii ki kayit ettirmem gerekiyor bunun iicn de register Launcer (reggisterLauncer)gibi bir method yazacagim. Bu Launcer larin ne yapacagini hep asagidaki
+                //method da tanimlayacagm. ve daha sonra da onlari onCreate altinda cagiracagim.Yani bunlarin ben ne yapacgini tanimlamis olacagim onCreate altinda.
+                //yani bizim Launcer imiz varsa, bunun ne yapacagini Android e onCreate altinda soylememeiz gerekiyor.
+                activityResultLauncher.launch(intentToGallery); //gallery e git
+            }
         }
 
-
-        else { //o zaman izin verilmis.
-            //gallery e git
-            //simdi ise biz baska bir yere gideegimizden oturu intenti kullancagiz. Ama bu sefer ne yapacginizi sececgiz cunku artik cihazin iceriisne gidiyoru ve cihazin iceriisnde ne yapacgimiz
-            //Action class i ile soyleyecegiz.
-            //ACTion= ne yapacagiz.
-            //Uri ile de ayni url de oldug gibi nereye gidecegimizi belirtecegiz.
-            //bu senaryo da pick yani biz gidip gallery den bir foto yu tutatcgiz.
-            //uri ile de ben gallery e gidecegm ve ordan bir gorsek alacgim diyecegim.
-
-            Intent intentToGallery=new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI); //gallery e gittim ve ordan bir image alip getirevegim.
-            //evet ben galeriye gittim simdi ne yapacagim? Bunun icin de REsultLAuncer gibi class lari kullanacagiz. Yani sekilde izin verildi mesela simdi ne yapacgim gibi durumlrda da ResultLAuncer
-            //i kullanacgiz.
-            //yukarida Global degisken olarak tanimlanan deguiskenlere bakabilirisn.
-            //ama oncelikle yukaridaki variable lare tabii ki kayit ettirmem gerekiyor bunun iicn de register Launcer (reggisterLauncer)gibi bir method yazacagim. Bu Launcer larin ne yapacagini hep asagidaki
-            //method da tanimlayacagm. ve daha sonra da onlari onCreate altinda cagiracagim.Yani bunlarin ben ne yapacgini tanimlamis olacagim onCreate altinda.
-            //yani bizim Launcer imiz varsa, bunun ne yapacagini Android e onCreate altinda soylememeiz gerekiyor.
-            activityResultLauncher.launch(intentToGallery); //gallery e git
-        }
 
     }
     //evet simdi ben iizin verilirse veya verilmezse ne yapacigmi belirtecgiom bir method yaziyorum.
