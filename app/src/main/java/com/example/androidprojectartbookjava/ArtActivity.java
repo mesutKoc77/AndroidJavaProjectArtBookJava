@@ -56,9 +56,10 @@ public class ArtActivity extends AppCompatActivity {
         //bunun kodu da su sekilde
 
         Bitmap smallImage = makeSmallerImage(selectedImage,300);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        smallImage.compress(Bitmap.CompressFormat.PNG,50,outputStream);
-        byte[] byteArray = outputStream.toByteArray();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();// Bu nesne, daha sonra sıkıştırılmış görüntü verilerini saklamak için kullanılacak.
+        smallImage.compress(Bitmap.CompressFormat.PNG,50,outputStream);//ve burada sikistirilmis olan nesneyi, outputStream nesnesi icersisine sakladik.
+        byte[] byteArray = outputStream.toByteArray();//sonra bu nesneyi aliriz ve byte dizisine ceviririz. ve istersen biz bunu sunucuya gondeririz veya dosya olarak bir yerlerde kayit
+        //ederiz
         //simdo aldigimiz image i birlere ve sifirlara cevirmis olduk.
     }
 
