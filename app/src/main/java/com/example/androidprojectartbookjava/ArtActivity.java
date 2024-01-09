@@ -23,6 +23,8 @@ import android.widget.Toast;
 import com.example.androidprojectartbookjava.databinding.ActivityArtBinding;
 import com.google.android.material.snackbar.Snackbar;
 
+import java.io.ByteArrayOutputStream;
+
 public class ArtActivity extends AppCompatActivity {
 
     private ActivityArtBinding binding;
@@ -44,9 +46,39 @@ public class ArtActivity extends AppCompatActivity {
     }
 
     public void save (View view) {
+        String name=binding.nameText.getText().toString();
+        String artistName=binding.artistText.getText().toString();
+        String year=binding.yearText.getText().toString();
+        //bitmap i alirken, kuculterek lammiz lazim yoksa coker. Bunu da bir method ile yapacagiz. Methodumuzun adi; makeSmallerImage
+        //Uygulamada kayit edilen foto vb objeler, sifirilar ve birler olarak kyit edilirler, Dolyasiyla biz kullanicidan bunu aldigiimda sifir bir olarak aliyoruz ama onu tabi ki
+        //tekrardan image e de cevirmemiz gerekecektir. Tabii ki bunu SQL lite a kayit etmek icin  bunlari alip birlere sifirlara cevirmemiz lazim cunku SQL ta direkt image i
+        //kayit etmemis, birler sifirlar olarak kayit edecegiz.
+        //bunun kodu da su sekilde
 
+        Bitmap smallImage = makeSmallerImage(selectedImage,300);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        smallImage.compress(Bitmap.CompressFormat.PNG,50,outputStream);
+        byte[] byteArray = outputStream.toByteArray();
+        //simdo aldigimiz image i birlere ve sifirlara cevirmis olduk.
+    }
 
+    public Bitmap makeSmallerImage(Bitmap image, int maximumSize){
+        int width=image.getWidth();
+        int height=image.getHeight();
 
+        float bitmapRatio=(float) width/(float)height;
+        if (bitmapRatio>1){
+            //landscape image
+            width=maximumSize;
+            height=(int)(width/bitmapRatio);
+
+        } else {
+            //portrait image
+            height=maximumSize;
+            width=(int)(height*bitmapRatio);
+        }
+        return image.createScaledBitmap(image,width,height,true);
+        //burada image. deyince createScaledBitmap cikmiyor ama Bitmap.createSclaedBitmap deyince cikiyor. Dikkat.
     }
 
     public void selectImage (View view) {
