@@ -2,7 +2,9 @@ package com.example.androidprojectartbookjava;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -25,7 +27,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;  //herbi xml layoutu icin ayri bir Binding sinifi otomatik olusturulur. Vunku build boilumune viewvbindige true demis ve yuklemistik.  Bu baglama sinifinin bir ornegini olusturmak icin de inflate methodunu
     //kullanacagiz.
 
-    ArrayList<Art> arrayList;
+    ArrayList<Art> artArrayList;
+    ArtAdapter artAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,14 +37,22 @@ public class MainActivity extends AppCompatActivity {
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         View view=binding.getRoot();
         setContentView(view);
+        artArrayList=new ArrayList<>();
+        binding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        artAdapter=new ArtAdapter(artArrayList);
+        binding.recyclerView.setAdapter(artAdapter);
+        //simdi ise ArtAdpater e, yeni veri geldiginde lutfen kendini gunceller misin, demmeiz gereiyor. asagoda getData() methodunda artAdapter.notifyDataSetChanged();
+        //ile bunu yapmis oolduk.
+
         getData();
-        arrayList=new ArrayList<>();
 
 
     }
     
     //simdi ise kullanicidan almis oldugumn verileri gorecegim.
     
+
+    @SuppressLint("NotifyDataSetChanged")
     private void getData() {
         try {
             SQLiteDatabase sqLiteDatabase=this.openOrCreateDatabase("Arts",MODE_PRIVATE,null); //Arts isimli DataBase imizi actik.
@@ -55,10 +66,11 @@ public class MainActivity extends AppCompatActivity {
                 String name = cursor.getString(nameIx);
                 int id = cursor.getInt(idIx);
                 Art art=new Art(name,id); //once Art isimli bir class olusturudk ve ordan da birer nesene olusturuduk, olusturudugumuz her bir neseneyi ise bir Arrayliste attik.
-                arrayList.add(art);
+                artArrayList.add(art);
                 //simdi ise bunlari kullaniciya recylce view ile gosterme zamani. Bunun iicnde bir reyclervioew olusturmmaiz gerekixor.
 
             }
+            artAdapter.notifyDataSetChanged();//yani yeni veriler geldigin de kendini gunceller
             cursor.close();
 
 
