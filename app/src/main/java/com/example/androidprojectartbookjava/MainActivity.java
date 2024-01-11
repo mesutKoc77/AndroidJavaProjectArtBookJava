@@ -4,6 +4,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -11,6 +13,8 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.example.androidprojectartbookjava.databinding.ActivityMainBinding;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -21,6 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;  //herbi xml layoutu icin ayri bir Binding sinifi otomatik olusturulur. Vunku build boilumune viewvbindige true demis ve yuklemistik.  Bu baglama sinifinin bir ornegini olusturmak icin de inflate methodunu
     //kullanacagiz.
 
+    ArrayList<Art> arrayList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -28,9 +34,42 @@ public class MainActivity extends AppCompatActivity {
         binding=ActivityMainBinding.inflate(getLayoutInflater());
         View view=binding.getRoot();
         setContentView(view);
+        getData();
+        arrayList=new ArrayList<>();
 
 
     }
+    
+    //simdi ise kullanicidan almis oldugumn verileri gorecegim.
+    
+    private void getData() {
+        try {
+            SQLiteDatabase sqLiteDatabase=this.openOrCreateDatabase("Arts",MODE_PRIVATE,null); //Arts isimli DataBase imizi actik.
+            Cursor cursor = sqLiteDatabase.rawQuery("SELECT * FROM arts", null); //simdi arts isimli tablodan tum bilgileri cektik ve onu bir Cursor nesnesine atadik.
+            //cursor, satir satir hareket eder, ornegin birinci satira once gider, o satirdaki sutun degerlerini talep ederek hareket etmemizi saglar.
+            //simdi id ve artname lerin sutun numarlarini veya indekslerini alacagim.
+            //cursor ile ilgili daha ayrintili biligiyi diger dosyaya kayit ettim.
+            int nameIx = cursor.getColumnIndex("artname");
+            int idIx=cursor.getColumnIndex("id");
+            while(cursor.moveToNext()){
+                String name = cursor.getString(nameIx);
+                int id = cursor.getInt(idIx);
+                Art art=new Art(name,id); //once Art isimli bir class olusturudk ve ordan da birer nesene olusturuduk, olusturudugumuz her bir neseneyi ise bir Arrayliste attik.
+                arrayList.add(art);
+                //simdi ise bunlari kullaniciya recylce view ile gosterme zamani. Bunun iicnde bir reyclervioew olusturmmaiz gerekixor.
+
+            }
+            cursor.close();
+
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+        
+    }
+    
+    
+    
 
     //simdi OptionMenu olusturuldugnda ne olacagini yazacagiz.
     @Override

@@ -11,6 +11,8 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
@@ -32,6 +34,8 @@ public class ArtActivity extends AppCompatActivity {
     ActivityResultLauncher<String> permissionLauncher;     //bunu da bir, izin aldigimda bana String donecegini bildigim icin  bu duurumda ne olacagini anlatiyorum.
 
     Bitmap selectedImage; //donen data yerininn, image e donusturulmesi
+
+    SQLiteDatabase database;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +65,34 @@ public class ArtActivity extends AppCompatActivity {
         byte[] byteArray = outputStream.toByteArray();//sonra bu nesneyi aliriz ve byte dizisine ceviririz. ve istersen biz bunu sunucuya gondeririz veya dosya olarak bir yerlerde kayit
         //ederiz
         //simdo aldigimiz image i birlere ve sifirlara cevirmis olduk.
+
+        try {
+
+            database=this.openOrCreateDatabase("Arts",MODE_PRIVATE,null); //ARTS isimli bir genel bir database olusturduk. Asagida ise sheet lerini olusturacguz.
+            database.execSQL("CREATE TABLE IF NOT EXISTS arts (id INTEGER PRIMARY KEY, artname VARCHAR, paintername VARCHAR, year VARCHAR, image BLOB)");//simdi arts isimli bir sheet oluruldu bu Arts isimli database icersiinde. //paintername, artistname  iicin kullanildik. artname=name
+
+            //simdi kullanicidan bilgileri aliyorum.
+            String sqlString="INSERT INTO arts (artname, paintername, year, image) VALUES(?,?,?,?)";
+            //sqlStatemnet olusturacgiz ve bu; bizim bindiging islemlerimizi rahat yapabilmek icin olusturdugumuz bir obje.
+            //simdi asagida sunu soyluyoruz. Yukaridaki sqlstring'i aliyorum ve database icerisiinde calistiracagim ben demek.
+
+            SQLiteStatement sqLiteStatement=database.compileStatement(sqlString); //ve calistirdim
+            sqLiteStatement.bindString(1,name);
+            sqLiteStatement.bindString(2,artistName);
+            sqLiteStatement.bindString(3,year);
+            sqLiteStatement.bindBlob(4,byteArray);
+            sqLiteStatement.execute();
+
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+
+        //artik kayit ettik ve sonrada artik mainActivity e donus yapmamiz gerekecek.
+       // finish(); //bu da burayi kapatir ve main Activity e geri doner.
+        Intent intent=new Intent(ArtActivity.this,MainActivity.class);
+
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP); //buraya gelmek icin mesela, mainActivity i acmis ama kapatmamis idim. //simdi ise acilmis olan butun aktiviteleri, ki iceirisnde bulundugum aktivite dahil, tum aktiviteleri kapat ve asagida verilen komutu uygula. Asagikdaki komut zaten MainAvtivity e gidiyorud.
+        startActivity(intent);
     }
 
     public Bitmap makeSmallerImage(Bitmap image, int maximumSize){
