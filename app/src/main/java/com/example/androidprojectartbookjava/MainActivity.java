@@ -141,11 +141,15 @@ Bu şekilde, XML layout dosyasındaki tasarımlar, kullanıcının etkileşime g
         //biz layout umuzda bir tane kullandik ama  birden fazla olabilirdi.
         //eger bizimkisi secilmis ise bu duurmda ne oalcak onu yazagiz. bizim menjuyu tiklandiginda Artactivity class ina yonlendirecegiz.
         if (item.getItemId()==R.id.add_art){
-            Intent intent = new Intent(this,ArtActivity.class);
+            Intent intent = new Intent(MainActivity.this,ArtActivity.class);
+            intent.putExtra("info","new");
             startActivity(intent);
         }
         // else if (item.getItemId()==) .....    Eger birden fazla MEnu muz olsa idi her bir menu icin ayri ayri direktifler verecektik. Ama suan bizim bir adet Menu muz var. Dolayisila
         // else if' e ihtiyacimiz suan icin yok.
         return super.onOptionsItemSelected(item);
     }
+
+    //Ozellikle SQL lite ile calisriken ve test yaparken veya bug larla ugrasiyrken uygulamayi emulatorden silip yeninden yuklemek dhaa iyidir,
+    //ayrica cursor u kapatmayi unutma.
 }

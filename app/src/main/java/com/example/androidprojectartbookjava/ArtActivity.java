@@ -11,9 +11,11 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
@@ -45,6 +47,49 @@ public class ArtActivity extends AppCompatActivity {
         View view=binding.getRoot();
         setContentView(view);
         registerLauncher();
+        database=this.openOrCreateDatabase("Arts",MODE_PRIVATE,null); //ARTS isimli bir genel bir database olusturduk. Asagida ise sheet lerini olusturacguz.
+
+
+        Intent intent=getIntent();
+        String info = intent.getStringExtra("info");
+        if (info.matches("new")){
+            //yani kullanici yeni bir art eklemek istiyor.
+            binding.nameText.setText("");
+            binding.artistText.setText("");
+            binding.yearText.setText("");
+            binding.button.setVisibility(View.VISIBLE);
+            Bitmap selectImage=BitmapFactory.decodeResource(getApplicationContext().getResources(),R.drawable.selectimage);
+            binding.imageView.setImageBitmap(selectImage);
+
+        }else{
+            //degilse, demek ki bir id yolladi yani ilgili resime tikladi ve orda belki duzenleme veya gormek istiyor.
+            int artId = intent.getIntExtra("artId", 1);
+            binding.button.setVisibility(View.INVISIBLE);
+            //database den cekerken bilgileri, try catch yapmak daha guvenli.
+            try {
+                Cursor cursor =database.rawQuery("SELECT * FROM arts WHERE id=?",new String[]{String.valueOf(artId)});
+                int artNameIx=cursor.getColumnIndex("artname");
+                int painterNameIx=cursor.getColumnIndex("paintername");
+                int yearIx=cursor.getColumnIndex("year");
+                int imageIx=cursor.getColumnIndex("image");
+
+                while (cursor.moveToNext()){
+                    binding.nameText.setText(cursor.getString(artNameIx));
+                    binding.artistText.setText(cursor.getString(painterNameIx));
+                    binding.yearText.setText(cursor.getString(yearIx));
+
+                    byte [] bytes=cursor.getBlob(imageIx);
+                    Bitmap bitmap= BitmapFactory.decodeByteArray(bytes,0,bytes.length);
+                    binding.imageView.setImageBitmap(bitmap);
+
+                }
+                cursor.close();
+
+            } catch (Exception e){
+                e.printStackTrace();
+            }
+
+        }
 
 
     }
@@ -67,8 +112,9 @@ public class ArtActivity extends AppCompatActivity {
         //simdo aldigimiz image i birlere ve sifirlara cevirmis olduk.
 
         try {
-
+            //yukarida onCreate altinda zaten yazdigim icin veya olusutrudugumuz icin Database'i, buradan yeninden yazma ihtiaci hissetmedik
             database=this.openOrCreateDatabase("Arts",MODE_PRIVATE,null); //ARTS isimli bir genel bir database olusturduk. Asagida ise sheet lerini olusturacguz.
+
             database.execSQL("CREATE TABLE IF NOT EXISTS arts (id INTEGER PRIMARY KEY, artname VARCHAR, paintername VARCHAR, year VARCHAR, image BLOB)");//simdi arts isimli bir sheet oluruldu bu Arts isimli database icersiinde. //paintername, artistname  iicin kullanildik. artname=name
 
             //simdi kullanicidan bilgileri aliyorum.
@@ -110,7 +156,7 @@ public class ArtActivity extends AppCompatActivity {
             height=maximumSize;
             width=(int)(height*bitmapRatio);
         }
-        return image.createScaledBitmap(image,width,height,true);
+        return Bitmap.createScaledBitmap(image,width,height,true);
         //burada image. deyince createScaledBitmap cikmiyor ama Bitmap.createSclaedBitmap deyince cikiyor. Dikkat.
     }
 

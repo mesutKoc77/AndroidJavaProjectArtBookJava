@@ -1,5 +1,8 @@
 package com.example.androidprojectartbookjava;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
@@ -21,7 +24,6 @@ public class ArtAdapter extends RecyclerView.Adapter <ArtAdapter.ArtHolder> {
 
     //2. yapilacak !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    @NonNull
     @Override
     public ArtHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         RecyclerRowwBinding recyclerRowwBinding=RecyclerRowwBinding.inflate(LayoutInflater.from(parent.getContext()),parent, false);
@@ -29,8 +31,18 @@ public class ArtAdapter extends RecyclerView.Adapter <ArtAdapter.ArtHolder> {
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ArtHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ArtHolder holder,int position) {
         holder.binding.recyclerViewTextView.setText(artArrayList.get(position).name);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent=new Intent(holder.itemView.getContext(),ArtActivity.class);
+                intent.putExtra("artId",artArrayList.get(position).id);
+                intent.putExtra("info","old");
+                holder.itemView.getContext().startActivity(intent);
+            }
+        });
+
 
     }
 
@@ -47,9 +59,9 @@ public class ArtAdapter extends RecyclerView.Adapter <ArtAdapter.ArtHolder> {
     //ArtADapter icin bu class i olusturuduk.
 
     //ve ArtHolder iisimli baska bir class i asagoida olusttruduk.
-    public static class ArtHolder extends RecyclerView.ViewHolder //gorunum tutucugu olusturuduk.
+    public class ArtHolder extends RecyclerView.ViewHolder //gorunum tutucugu olusturuduk.
     {
-        RecyclerRowwBinding binding;
+        private RecyclerRowwBinding binding;
         //onun da constructor i asagida.
         public ArtHolder(RecyclerRowwBinding binding )    //simdi recylcer View Xml imiz ne ise onu baglayacagiz. Ve simdi recylcer view xml imiz olustutracguz. layout a gittik ve olusutrudk.
                 //ve onu buraya cektik.
